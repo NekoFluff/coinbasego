@@ -60,7 +60,7 @@ type TickerMessage struct {
 }
 
 func (client *Client) WebSocketCreate(channels []Channel, wsh WebSockerHandler) *WebSocket {
-	socketUrl := "wss://ws-feed.exchange.coinbasego.com"
+	socketUrl := "wss://ws-feed.exchange.coinbase.com"
 	conn, _, err := websocket.DefaultDialer.Dial(socketUrl, nil)
 	if err != nil {
 		log.Fatal("Error connecting to Websocket Server:", err)
