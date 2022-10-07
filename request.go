@@ -31,5 +31,5 @@ func (client *Client) sendRequest(r Request, dataOut interface{}, pageOut *Pagin
 }
 
 func (client *Client) getBaseURL() string {
-	return "https://api.exchange.coinbasego.com"
+	return "https://api.exchange.coinbase.com"
 }
