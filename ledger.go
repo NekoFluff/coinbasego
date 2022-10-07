@@ -29,7 +29,6 @@ func (client *Client) Ledger(p LedgerParams) ([]Ledger, *PaginationResponse, err
 	var ledger []Ledger
 	v, _ := query.Values(p)
 	paramStr := v.Encode()
-	fmt.Println("Ledger - Param String:", paramStr)
 
 	req := Request{
 		Method:  "GET",

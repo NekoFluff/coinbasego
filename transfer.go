@@ -34,7 +34,6 @@ func (client *Client) Transfers(accountID string, p TransfersParams) ([]Transfer
 		PathURL: fmt.Sprintf("/accounts/%s/transfers?%s", accountID, paramStr),
 		Body:    nil,
 	}
-	fmt.Println("Transfers - Path URL:", req.PathURL)
 
 	pageResp := &PaginationResponse{}
 	if err := client.sendRequest(req, &transfer, pageResp); err != nil {

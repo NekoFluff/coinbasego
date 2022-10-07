@@ -2,7 +2,6 @@ package coinbasego
 
 import (
 	"encoding/json"
-	"fmt"
 	"time"
 
 	"github.com/google/go-querystring/query"
@@ -76,7 +75,6 @@ func (client *Client) Orders(p OrdersParams) ([]Order, *PaginationResponse, erro
 		PathURL: "/orders?" + paramStr,
 		Body:    nil,
 	}
-	fmt.Println("Orders - Path URL:", req.PathURL)
 
 	pageResp := &PaginationResponse{}
 	if err := client.sendRequest(req, &orders, pageResp); err != nil {
@@ -150,7 +148,6 @@ type OrderCreateBody struct {
 
 func (client *Client) OrderCreate(body OrderCreateBody) (*Order, error) {
 	b, err := json.Marshal(body)
-	fmt.Println("Request Body:", string(b))
 	if err != nil {
 		return nil, err
 	}

@@ -117,7 +117,6 @@ func (client *Client) Candles(productID string, p CandlesParams) ([]Candle, *Pag
 		PathURL: fmt.Sprintf("/products/%s/candles?%s", productID, paramStr),
 		Body:    nil,
 	}
-	fmt.Println("Candles - Path URL:", req.PathURL)
 
 	pageResp := &PaginationResponse{}
 	if err := client.sendRequest(req, &candles, pageResp); err != nil {
