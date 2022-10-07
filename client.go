@@ -1,4 +1,4 @@
-package coinbase
+package coinbasego
 
 type ClientCredentials struct {
 	ApiKey     string

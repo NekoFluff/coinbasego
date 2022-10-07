@@ -1,4 +1,4 @@
-package coinbase
+package coinbasego
 
 type Account struct {
 	ID             string  `json:"id" binding:"required"`

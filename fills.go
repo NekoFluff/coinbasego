@@ -1,4 +1,4 @@
-package coinbase
+package coinbasego
 
 type Fill struct {
 	TradeID   string `json:"trade_id" binding:"required"`
