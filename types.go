@@ -3,12 +3,12 @@ package coinbasego
 type ProductID string
 
 type PaginationParams struct {
-	Before string `url:"before,omitempty"`
-	After  string `url:"after,omitempty"`
+	Cursor string `url:"cursor,omitempty"`
 	Limit  int    `url:"limit" binding:"required"`
 }
 
 type PaginationResponse struct {
-	Before string
-	After  string
+	HasNext bool   `json:"has_next"`
+	Cursor  string `json:"cursor"`
+	Size    int32  `json:"size"`
 }

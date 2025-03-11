@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-func (c *Client) process(req *http.Request, dataOut interface{}, pageOut *PaginationResponse) error {
+func (c *Client) process(req *http.Request, dataOut interface{}) error {
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return err
@@ -28,11 +28,6 @@ func (c *Client) process(req *http.Request, dataOut interface{}, pageOut *Pagina
 		if err = json.Unmarshal(b, &dataOut); err != nil {
 			return err
 		}
-	}
-
-	if pageOut != nil {
-		pageOut.After = resp.Header.Get("CB-AFTER")
-		pageOut.Before = resp.Header.Get("CB-BEFORE")
 	}
 
 	return nil

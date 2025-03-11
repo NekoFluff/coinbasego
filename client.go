@@ -1,9 +1,8 @@
 package coinbasego
 
 type ClientCredentials struct {
-	ApiKey     string
-	SecretKey  string
-	Passphrase string
+	KeyName   string
+	KeySecret string
 }
 
 type Client struct {

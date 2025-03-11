@@ -3,122 +3,167 @@ package coinbasego
 import (
 	"encoding/json"
 	"time"
-
-	"github.com/google/go-querystring/query"
 )
 
-type Order struct {
-	ID             string      `json:"id" binding:"required"`
-	Price          string      `json:"price"`
-	Size           string      `json:"size"`
-	ProductID      ProductID   `json:"product_id" binding:"required"`
-	ProfileID      string      `json:"profile_id"`
-	Side           OrderSide   `json:"side" binding:"required"`
-	Funds          string      `json:"funds"`
-	SpecifiedFunds string      `json:"specified_funds"`
-	Type           OrderType   `json:"type" binding:"required"`
-	TimeInForce    string      `json:"time_in_force"`
-	ExpireTime     string      `json:"expire_time"`
-	PostOnly       bool        `json:"post_only" binding:"required"`
-	CreatedAt      string      `json:"created_at" binding:"required"`
-	DoneAt         string      `json:"done_at"`
-	DoneReason     string      `json:"done_reason"`
-	RejectReason   string      `json:"reject_reason"`
-	FillFees       string      `json:"fill_fees" binding:"required"`
-	FilledSize     string      `json:"filled_size" binding:"required"`
-	ExecutedValue  string      `json:"executed_value"`
-	Status         OrderStatus `json:"status" binding:"required"`
-	Settled        bool        `json:"settled" binding:"required"`
-	Stop           string      `json:"stop"`
-	StopPrice      string      `json:"stop_price"`
-	FundingAmount  string      `json:"funding_amount"`
-	ClientOID      string      `json:"client_oid"`
+type OrdersResponse struct {
+	PaginationResponse
+	Orders []Order `json:"orders"`
 }
 
-type Sorting string
+type OrderResponse struct {
+	Order Order `json:"order"`
+}
 
-const (
-	SortingAsc  Sorting = "asc"
-	SortingDesc Sorting = "desc"
-)
+type Order struct {
+	OrderID            string `json:"order_id"`
+	ProductID          string `json:"product_id"`
+	UserID             string `json:"user_id"`
+	OrderConfiguration struct {
+		MarketmarketIOC struct {
+			QuoteSize string `json:"quote_size"`
+			BaseSize  string `json:"base_size"`
+		} `json:"marketmarket_ioc"`
+		SorLimitIOC struct {
+			QuoteSize  string `json:"quote_size"`
+			BaseSize   string `json:"base_size"`
+			LimitPrice string `json:"limit_price"`
+		} `json:"sor_limit_ioc"`
+		LimitLimitGTC struct {
+			QuoteSize  string `json:"quote_size"`
+			BaseSize   string `json:"base_size"`
+			LimitPrice string `json:"limit_price"`
+			PostOnly   bool   `json:"post_only"`
+		} `json:"limit_limit_gtc"`
+		LimitLimitGTD struct {
+			QuoteSize  string    `json:"quote_size"`
+			BaseSize   string    `json:"base_size"`
+			LimitPrice string    `json:"limit_price"`
+			EndTime    time.Time `json:"end_time"`
+			PostOnly   bool      `json:"post_only"`
+		} `json:"limit_limit_gtd"`
+		LimitLimitFOK struct {
+			QuoteSize  string `json:"quote_size"`
+			BaseSize   string `json:"base_size"`
+			LimitPrice string `json:"limit_price"`
+		} `json:"limit_limit_fok"`
+		// TODO: There are others
+	} `json:"order_configuration"`
+	Side                  OrderSide   `json:"side"`
+	ClientOrderID         string      `json:"client_order_id"`
+	Status                OrderStatus `json:"status"`
+	TimeInForce           TimeInForce `json:"time_in_force"`
+	CreatedTime           time.Time   `json:"created_time"`
+	CompletionPercentage  string      `json:"completion_percentage"`
+	FilledSize            string      `json:"filled_size"`
+	AverageFilledPrice    string      `json:"average_filled_price"`
+	NumberOfFills         string      `json:"number_of_fills"`
+	FilledValue           string      `json:"filled_value"`
+	PendingCancel         bool        `json:"pending_cancel"`
+	SizeInQuote           bool        `json:"size_in_quote"`
+	TotalFees             string      `json:"total_fees"`
+	SizeInclusiveOfFees   bool        `json:"size_inclusive_of_fees"`
+	TotalValueAfterFees   string      `json:"total_value_after_fees"`
+	TriggerStatus         string      `json:"trigger_status"` // TODO: This is an enum
+	OrderType             OrderType   `json:"order_type"`
+	RejectReason          string      `json:"reject_reason"` // TODO: This is an enum
+	Settled               bool        `json:"settled"`
+	ProductType           string      `json:"product_type"` // TODO: This is an enum
+	RejectMessage         string      `json:"reject_message"`
+	CancelMessage         string      `json:"cancel_message"`
+	OrderPlacementSource  string      `json:"order_placement_source"` // TODO: This is an enum
+	OutstandingHoldAmount string      `json:"outstanding_hold_amount"`
+	IsLiquidation         bool        `json:"is_liquidation"`
+	LastFillTime          time.Time   `json:"last_fill_time"`
+	// TODO: Edit history
+	Leverage string `json:"leverage"`
+	// TODO: Attached Order (duplicate info of this Order struct)
+}
 
 type OrderStatus string
 
 const (
-	OrderStatusOpen     OrderStatus = "open"
-	OrderStatusPending  OrderStatus = "pending"
-	OrderStatusRejected OrderStatus = "rejected"
-	OrderStatusDone     OrderStatus = "done"
-	OrderStatusActive   OrderStatus = "active"
-	OrderStatusReceived OrderStatus = "received"
-	OrderStatusAll      OrderStatus = "all"
+	OrderStatusOpen         OrderStatus = "OPEN"
+	OrderStatusPending      OrderStatus = "PENDING"
+	OrderStatusFilled       OrderStatus = "FILLED"
+	OrderStatusCancelled    OrderStatus = "CANCELLED"
+	OrderStatusExpired      OrderStatus = "EXPIRED"
+	OrderStatusFailed       OrderStatus = "FAILED"
+	OrderStatusUnknown      OrderStatus = "UNKNOWN_ORDER_STATUS"
+	OrderStatusQueued       OrderStatus = "QUEUED"
+	OrderStatusCancelQueued OrderStatus = "CANCEL_QUEUED"
 )
 
 type OrdersParams struct {
 	PaginationParams
-	ProfileID string        `url:"profile_id,omitempty"`
-	ProductID ProductID     `url:"product_id,omitempty"`
-	SortedBy  string        `url:"sortedBy,omitempty"`
-	Sorting   Sorting       `url:"sorting,omitempty"`
-	StartDate time.Time     `url:"start_date,omitempty"`
-	EndDate   time.Time     `url:"end_date,omitempty"`
-	Status    []OrderStatus `url:"status" binding:"required"`
+	OrderIDs     []string      `url:"order_ids,omitempty"`
+	ProductIDs   []ProductID   `url:"product_ids,omitempty"`
+	OrderStatus  OrderStatus   `url:"order_status,omitempty"`
+	TimeInForces []TimeInForce `url:"time_in_forces,omitempty"`
+	OrderTypes   []OrderType   `url:"order_types,omitempty"`
+	OrderSide    OrderSide     `url:"order_side,omitempty"`
+	StartDate    time.Time     `url:"start_date,omitempty"` // RFC3339 timestamp, e.g. 2006-01-02T15:04:05Z
+	EndDate      time.Time     `url:"end_date,omitempty"`   // RFC3339 timestamp, e.g. 2006-01-02T15:04:05Z
 }
 
-func (client *Client) Orders(p OrdersParams) ([]Order, *PaginationResponse, error) {
-	var orders []Order
-	v, _ := query.Values(p)
-	paramStr := v.Encode()
+func (client *Client) Orders(p OrdersParams) ([]Order, error) {
+	var resp OrdersResponse
 
 	req := Request{
 		Method:  "GET",
-		PathURL: "/orders?" + paramStr,
+		PathURL: "/api/v3/brokerage/orders/historical/batch",
+		Params:  p,
 		Body:    nil,
 	}
 
-	pageResp := &PaginationResponse{}
-	if err := client.sendRequest(req, &orders, pageResp); err != nil {
-		return nil, nil, err
-	}
-
-	return orders, pageResp, nil
-}
-
-func (client *Client) Order(id string) (*Order, error) {
-	var order Order
-	req := Request{
-		Method:  "GET",
-		PathURL: "/orders/" + id,
-		Body:    nil,
-	}
-
-	if err := client.sendRequest(req, &order, nil); err != nil {
+	if err := client.sendRequest(req, &resp); err != nil {
 		return nil, err
 	}
 
-	return &order, nil
+	return resp.Orders, nil
+}
+
+func (client *Client) Order(id string) (*Order, error) {
+	var resp OrderResponse
+	req := Request{
+		Method:  "GET",
+		PathURL: "/api/v3/brokerage/orders/historical/" + id,
+		Body:    nil,
+	}
+
+	if err := client.sendRequest(req, &resp); err != nil {
+		return nil, err
+	}
+
+	return &resp.Order, nil
 }
 
 type OrderType string
 
 const (
-	OrderTypeLimit  OrderType = "limit"
-	OrderTypeMarket OrderType = "market"
-	OrderTypeStop   OrderType = "stop"
+	OrderTypeUnknown   OrderType = "UNKNOWN_ORDER_TYPE"
+	OrderTypeMarket    OrderType = "MARKET"
+	OrderTypeLimit     OrderType = "LIMIT"
+	OrderTypeStop      OrderType = "STOP"
+	OrderTypeStopLimit OrderType = "STOP_LIMIT"
+	OrderTypeBracket   OrderType = "BRACKET"
+	OrderTypeTWAP      OrderType = "TWAP"
 )
 
 type OrderSide string
 
 const (
-	OrderSideBuy  OrderSide = "buy"
-	OrderSideSell OrderSide = "sell"
+	OrderSideBuy  OrderSide = "BUY"
+	OrderSideSell OrderSide = "SELL"
 )
 
 type TimeInForce string
 
 const (
-	TimeInForceGoodTillCanceled = "GTC"
-	TimeInForceGoodTillTime     = "GTT"
+	TimeInForceUnknown            TimeInForce = "UNKNOWN_TIME_IN_FORCE"
+	TimeInForceGoodUntilDateTime  TimeInForce = "GOOD_UNTIL_DATE_TIME"
+	TimeInForceGoodUntilCancelled TimeInForce = "GOOD_UNTIL_CANCELLED"
+	TimeInForceImmediateOrCancel  TimeInForce = "IMMEDIATE_OR_CANCEL"
+	TimeInForceFillOrKill         TimeInForce = "FILL_OR_KILL"
 )
 
 type CancelAfter string
@@ -159,7 +204,7 @@ func (client *Client) OrderCreate(body OrderCreateBody) (*Order, error) {
 		Body:    b,
 	}
 
-	if err := client.sendRequest(req, &order, nil); err != nil {
+	if err := client.sendRequest(req, &order); err != nil {
 		return nil, err
 	}
 

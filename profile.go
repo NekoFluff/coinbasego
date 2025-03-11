@@ -1,28 +1,28 @@
 package coinbasego
 
-import "time"
-
-type Profile struct {
-	ID        string    `json:"id" binding:"required"`
-	UserID    string    `json:"user_id" binding:"required"`
-	Name      string    `json:"name" binding:"required"`
-	Active    bool      `json:"active" binding:"required"`
-	IsDefault bool      `json:"is_default" binding:"required"`
-	HasMargin bool      `json:"has_margin" binding:"required"`
-	CreatedAt time.Time `json:"creatd_at" binding:"required"`
+type PortfoliosResponse struct {
+	Portfolios []Portfolio
 }
 
-func (client *Client) Profiles() ([]Profile, error) {
-	var accounts []Profile
+type Portfolio struct {
+	Name    string `json:"name"`
+	UUID    string `json:"uuid"`
+	Type    string `json:"type"`
+	Deleted bool   `json:"deleted"`
+}
+
+func (client *Client) Portfolios() ([]Portfolio, error) {
+	var resp PortfoliosResponse
+
 	req := Request{
 		Method:  "GET",
-		PathURL: "/profiles",
+		PathURL: "/api/v3/brokerage/portfolios",
 		Body:    nil,
 	}
 
-	if err := client.sendRequest(req, &accounts, nil); err != nil {
+	if err := client.sendRequest(req, &resp); err != nil {
 		return nil, err
 	}
 
-	return accounts, nil
+	return resp.Portfolios, nil
 }
